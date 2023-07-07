@@ -5,6 +5,9 @@ import { Card } from 'semantic-ui-react';
 const MovieList = () => {
   const [movies, setMovies] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [buttonClicked, setButtonClicked] = useState(false);
+
+ 
 
   useEffect(() => {
     axios
@@ -20,12 +23,14 @@ const MovieList = () => {
 
   const showMoviesHandler = () => {
     setLoading(!loading);
+    setButtonClicked(true);
   };
 
   return (
     <div>
       <h2>Star Wars Movies</h2>
       <button onClick={showMoviesHandler}>Fetch Movies</button>
+      {(!loading && buttonClicked) && <p>Loading...</p>}
       {loading ? (
         <Card.Group>
           {movies.map(movie => (
@@ -38,7 +43,7 @@ const MovieList = () => {
             </Card>
           ))}
         </Card.Group>
-      ) : null}
+      ) :null}
     </div>
   );
 };
