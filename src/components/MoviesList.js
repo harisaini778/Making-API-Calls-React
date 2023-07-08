@@ -1,24 +1,25 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import axios from 'axios';
 import { Card } from 'semantic-ui-react';
 
-const MovieList = () => {
+const MovieList = React.memo(() => {
   const [movies, setMovies] = useState([]);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [buttonClicked, setButtonClicked] = useState(false);
   const [retrying, setRetrying] = useState(false);
   const [retryTimer, setRetryTimer] = useState(null);
 
-  useEffect(() => {
-    fetchMovies();
+  const retryFetchMovies = useCallback(() => {
+    setRetrying(true);
+    setRetryTimer(setInterval(fetchMovies, 5000));
   }, []);
 
-  const fetchMovies = () => {
+  const fetchMovies = useCallback(() => {
     setLoading(true);
     setButtonClicked(false);
 
     axios
-      .get('https://swapi.dev/api/film')
+      .get('https://swapi.dev/api/films')
       .then(response => {
         setMovies(response.data.results);
         setLoading(false);
@@ -29,31 +30,35 @@ const MovieList = () => {
         console.log(error);
         retryFetchMovies();
       });
-  };
+  }, [retryFetchMovies, retryTimer]);
 
-  const retryFetchMovies = () => {
-    setRetrying(true);
-    setRetryTimer(setInterval(fetchMovies, 5000));
-  };
-
-  const cancelRetry = () => {
+  const cancelRetry = useCallback(() => {
     setRetrying(false);
     clearInterval(retryTimer);
     setLoading(false);
-  };
+  }, [retryTimer]);
 
-  const showMoviesHandler = () => {
+  const showMoviesHandler = useCallback(() => {
     setButtonClicked(true);
     fetchMovies();
-  };
+  }, [fetchMovies]);
+
+  useEffect(() => {
+    fetchMovies();
+  }, [fetchMovies]);
+
+  useEffect(() => {
+    if (movies.length > 0) {
+      setLoading(false);
+    }
+  }, [movies]);
 
   return (
     <div>
       <h2>Star Wars Movies</h2>
       <button onClick={showMoviesHandler}>Fetch Movies</button>
-      {/* {(!loading && buttonClicked) && <p>Loading...</p>} */}
       {retrying && !buttonClicked && <p>Retrying...</p>}
-      {loading && !buttonClicked? (
+      {loading && !buttonClicked ? (
         <p>Loading...</p>
       ) : (
         <Card.Group>
@@ -73,6 +78,6 @@ const MovieList = () => {
       )}
     </div>
   );
-};
+});
 
 export default MovieList;
