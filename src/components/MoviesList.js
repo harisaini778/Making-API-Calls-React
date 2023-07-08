@@ -8,6 +8,9 @@ const MovieList = React.memo(() => {
   const [buttonClicked, setButtonClicked] = useState(false);
   const [retrying, setRetrying] = useState(false);
   const [retryTimer, setRetryTimer] = useState(null);
+  const [newMovieTitle, setNewMovieTitle] = useState('');
+  const [newMovieEpisode, setNewMovieEpisode] = useState('');
+  const [newMovieOpeningCrawl, setNewMovieOpeningCrawl] = useState('');
 
   const retryFetchMovies = useCallback(() => {
     setRetrying(true);
@@ -43,6 +46,28 @@ const MovieList = React.memo(() => {
     fetchMovies();
   }, [fetchMovies]);
 
+  const handleTitleChange = useCallback(event => {
+    setNewMovieTitle(event.target.value);
+  }, []);
+
+  const handleEpisodeChange = useCallback(event => {
+    setNewMovieEpisode(event.target.value);
+  }, []);
+
+  const handleOpeningCrawlChange = useCallback(event => {
+    setNewMovieOpeningCrawl(event.target.value);
+  }, []);
+
+  const handleAddMovie = useCallback(() => {
+    const newMovieObj = {
+      title: newMovieTitle,
+      episode_id: newMovieEpisode,
+      opening_crawl: newMovieOpeningCrawl
+    };
+    console.log(newMovieObj);
+    // You can perform additional actions with newMovieObj, such as sending it to a backend server or updating the state.
+  }, [newMovieTitle, newMovieEpisode, newMovieOpeningCrawl]);
+
   useEffect(() => {
     fetchMovies();
   }, [fetchMovies]);
@@ -56,6 +81,26 @@ const MovieList = React.memo(() => {
   return (
     <div>
       <h2>Star Wars Movies</h2>
+      <div className="add-movie-form">
+        <input
+          type="text"
+          placeholder="Title"
+          value={newMovieTitle}
+          onChange={handleTitleChange}
+        />
+        <input
+          type="number"
+          placeholder="Episode"
+          value={newMovieEpisode}
+          onChange={handleEpisodeChange}
+        />
+        <textarea
+          placeholder="Opening Crawl"
+          value={newMovieOpeningCrawl}
+          onChange={handleOpeningCrawlChange}
+        ></textarea>
+        <button onClick={handleAddMovie}>Add Movie</button>
+      </div>
       <button onClick={showMoviesHandler}>Fetch Movies</button>
       {retrying && !buttonClicked && <p>Retrying...</p>}
       {loading && !buttonClicked ? (
