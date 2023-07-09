@@ -22,9 +22,9 @@ const MovieList = React.memo(() => {
     setButtonClicked(false);
 
     axios
-      .get('https://swapi.dev/api/films')
+      .get('https://crudcrud.com/Dashboard/226a7ef6d942401a8fe548015b3086ce') 
       .then(response => {
-        setMovies(response.data.results);
+        setMovies(response.data);
         setLoading(false);
         setRetrying(false);
         clearInterval(retryTimer);
@@ -64,9 +64,31 @@ const MovieList = React.memo(() => {
       episode_id: newMovieEpisode,
       opening_crawl: newMovieOpeningCrawl
     };
-    console.log(newMovieObj);
-    // You can perform additional actions with newMovieObj, such as sending it to a backend server or updating the state.
+
+    axios
+      .post('https://crudcrud.com/Dashboard/226a7ef6d942401a8fe548015b3086ce', newMovieObj) // Replace with your dummy API endpoint for creating a new movie
+      .then(response => {
+        setMovies(prevMovies => [...prevMovies, response.data]);
+      })
+      .catch(error => {
+        console.log(error);
+      });
+
+    setNewMovieTitle('');
+    setNewMovieEpisode('');
+    setNewMovieOpeningCrawl('');
   }, [newMovieTitle, newMovieEpisode, newMovieOpeningCrawl]);
+
+  const handleDeleteMovie = useCallback(id => {
+    axios
+      .delete(`https://crudcrud.com/Dashboard/226a7ef6d942401a8fe548015b3086ce/${id}`) // Replace with your dummy API endpoint for deleting a movie
+      .then(() => {
+        setMovies(prevMovies => prevMovies.filter(movie => movie.id !== id));
+      })
+      .catch(error => {
+        console.log(error);
+      });
+  }, []);
 
   useEffect(() => {
     fetchMovies();
@@ -108,11 +130,14 @@ const MovieList = React.memo(() => {
       ) : (
         <Card.Group>
           {movies.map(movie => (
-            <Card key={movie.episode_id}>
+            <Card key={movie.id}>
               <Card.Content>
                 <Card.Header>{movie.title}</Card.Header>
                 <Card.Meta>Episode {movie.episode_id}</Card.Meta>
                 <Card.Description>{movie.opening_crawl}</Card.Description>
+              </Card.Content>
+              <Card.Content extra>
+                <button onClick={() => handleDeleteMovie(movie.id)}>Delete</button>
               </Card.Content>
             </Card>
           ))}
